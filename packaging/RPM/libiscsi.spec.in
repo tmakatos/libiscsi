@@ -1,14 +1,18 @@
-Name: libiscsi
-Summary: iSCSI client library
+#Name: libiscsi%{?_extra_name}%{!?_extra_name:}
+Name: libiscsi-upstream
 Version: 1.19.0
-Release: 1GITHASH%{?dist}
+Summary: iSCSI client library
+Release: 1.1a3758b%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 URL: https://github.com/sahlberg/libiscsi
+%define _name %{name}-%{version}
+%define _prefix /opt/%{_name}
 
-Source: libiscsi-%{version}.tar.gz
+#Source: %{name}-%{version}%{?_extra_src}%{!?_extra_src:}.tar.gz
+Source: %{_name}-git%{githash}.tar.gz
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-root
+BuildRoot: %{_tmppath}/%{_name}-root
 BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: libtool
@@ -25,7 +29,7 @@ a network.
 %prep
 %setup -q
 # setup the init script and sysconfig file
-%setup -T -D -n libiscsi-%{version} -q
+%setup -T -D -n %{_name} -q
 
 %build
 
@@ -47,6 +51,8 @@ rm $RPM_BUILD_ROOT/%{_libdir}/libiscsi.la
 
 # Remove "*.old" files
 find $RPM_BUILD_ROOT -name "*.old" -exec rm -f {} \;
+
+rm -rf $RPM_BUILD_ROOT/%{_mandir}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -70,19 +76,17 @@ to iSCSI servers without having to set up the Linux iSCSI initiator.
 
 %files utils
 %doc COPYING LICENCE-GPL-2.txt LICENCE-LGPL-2.1.txt README TODO
+%exclude %{_bindir}/ld_iscsi.so
 %{_bindir}/iscsi-ls
 %{_bindir}/iscsi-inq
 %{_bindir}/iscsi-perf
 %{_bindir}/iscsi-readcapacity16
 %{_bindir}/iscsi-swp
-%{_mandir}/man1/iscsi-inq.1.gz
-%{_mandir}/man1/iscsi-ls.1.gz
-%{_mandir}/man1/iscsi-swp.1.gz
 
 %package devel
 Summary: iSCSI client development libraries
 Group: Development/Libraries
-Requires: libiscsi = %{version}-%{release}
+Requires: libiscsi-upstream = %{version}-%{release}
 
 %description devel
 The libiscsi-devel package includes the header files for libiscsi.
@@ -94,19 +98,6 @@ The libiscsi-devel package includes the header files for libiscsi.
 %{_includedir}/iscsi/scsi-lowlevel.h
 %{_libdir}/libiscsi.so
 %{_libdir}/pkgconfig/libiscsi.pc
-
-%package testsuite
-Summary: iSCSI test suite
-Group: Development/Tools
-
-%description testsuite
-Test tool for iSCSI/SCSI targets
-
-%files testsuite
-%defattr(-,root,root)
-%{_bindir}/iscsi-test-cu
-%{_mandir}/man1/iscsi-test-cu.1.gz
-
 
 %changelog
 * Sun Jul 14 2019 : 1.19.0
